@@ -54,21 +54,101 @@ var IDEAS=[
 ];
 var IDX={}; IDEAS.forEach(function(r){IDX[r[0]]={id:r[0],cat:r[1],title:r[2],hook:r[3],how:r[4]};});
 
-var PLAN=[
- ['Month 1',[
-  ['Week 1',[['Tue','Big catch reveal',1],['Thu','Teeth close-up fish ID',11],['Sun','Mini story: cast, strike, fight, fish, reaction',0]]],
-  ['Week 2',[['Tue','Hard strike',2],['Thu','What caught it',19],['Sun','Long video #1 plus 15 sec teaser',37]]],
-  ['Week 3',[['Tue','Guess the weight',17],['Thu','GT on the cast',3],['Sun','Sunset lifestyle montage',27]]],
-  ['Week 4',[['Tue','Best catch of the month (extra time on hook and pacing)',0],['Thu','Weird fish of the week',13],['Sun','Long video #2 from your best topic plus teaser',38]]]
- ]],
- ['Month 2',[
-  ['Week 1',[['Tue','New version of Month 1\'s best Short, different footage',0],['Thu','Answer a viewer question',33],['Sun','Series episode #1',0]]],
-  ['Week 2',[['Tue','Before and after catch: open on fish, rewind to the drop',0],['Thu','Quick tip: jig cadence',22],['Sun','Long video #3 plus teaser',39]]],
-  ['Week 3',[['Tue','Myth check',24],['Thu','Gear comparison: jig weight test',20],['Sun','Behind the scenes: trip prep',29]]],
-  ['Week 4',[['Tue','Best unused action clip',0],['Thu','Community choice',34],['Sun','Long video #4 plus monthly recap',40]]]
- ]]
+/* Month 1 starter plan. Each slot: [day, role, ideaId (0 = none), note].
+   Month 2 and later are generated automatically (see genMonth). */
+var MONTH1=[
+ [['Tue','Big catch',1,''],['Thu','Fish ID',11,''],['Sun','Mini story',0,'Cast or drop, strike, fight, fish, reaction. 15-25 sec.']],
+ [['Tue','Hard strike',2,''],['Thu','Gear and lure',19,''],['Sun','Long video #1',37,'Plus a 15 sec teaser for Reels and TikTok.']],
+ [['Tue','Guess the weight',17,''],['Thu','GT casting',3,''],['Sun','Lifestyle montage',27,'']],
+ [['Tue','Hero Short',0,'Your best catch of the month. Spend extra time on hook and pacing.'],['Thu','Fish fact',13,''],['Sun','Long video #2',38,'Use your best-performing topic, plus a 15 sec teaser.']]
 ];
-var SLOTS=[]; PLAN.forEach(function(m,mi){m[1].forEach(function(w,wi){w[1].forEach(function(s,si){SLOTS.push({key:mi+'-'+wi+'-'+si,month:m[0],week:w[0],day:s[0],title:s[1],idea:s[2]});});});});
+var DAYOFF={Tue:1,Thu:3,Sun:6};
+
+/* Step-by-step editing guides. Steps: [title, detail, minutes] */
+var GUIDES={
+ catch:{name:'Big catch Short',spec:'15-25 sec | 1080x1920 (9:16) | 30 fps, or 60 fps if you want slow motion',steps:[
+  ['Create the project','New project, vertical 9:16, 1080x1920. Pick 30 fps, or 60 fps if you filmed at 60 and want a slow-motion strike.',2],
+  ['Import only this fish','Import the clips from one catch: strike, fight, fish at the boat, landing, hero shot, release. Leave everything else out.',5],
+  ['Lay out the silent cut','Order: strike, fight (2-3 clips), fish appears, landing, hero shot. Your first frame must show the fish, the bent rod or the strike. Never open with the logo.',7],
+  ['Tighten every clip','Trim each clip to 0.5-2.5 seconds. Cut waiting at the start and end. Keep the hero shot 1.5-3 seconds. Total length 15-25 seconds.',8],
+  ['Add a speed ramp','On the strike or splash clip, slow to about 40% for about 1 second, then return to 100% for the fight. Needs 60 fps footage to look smooth.',4],
+  ['Add the hook text','3-7 words in the first second, such as THIS FISH HIT HARD! Bold white text with a soft shadow, upper third, clear of the app buttons. Keep it on screen about 2 seconds.',3],
+  ['Add one useful fact','After the reveal, one line: species, depth or lure, for example 120g jig | 80m. One fact only.',3],
+  ['Mix the sound','Keep natural drag and ocean sound. If you add music, set it to 15-25% volume and dip it for one second before the reveal.',4],
+  ['Adjust the color','Slightly raise contrast, protect bright sky highlights, keep ocean blue and fish colors realistic. Avoid heavy saturation.',3],
+  ['Add the end card','Last 1-2 seconds: Follow for more Maldives fishing, with the original VeyruKeyolhu logo unchanged.',2],
+  ['Review and export','Watch once with sound and once muted. Export 1080x1920 at the highest quality. Pick a cover frame showing the fish.',3]]},
+ fishid:{name:'Fish ID or fish fact',spec:'15-25 sec | 1080x1920 (9:16) | 30 fps',steps:[
+  ['Choose the odd feature','Pick the one thing that makes people curious: teeth, color, eye, shape or size.',2],
+  ['Create the project','New 9:16 project, 1080x1920, 30 fps. Import the close-up clips and one clean clip of the whole fish.',3],
+  ['Build the tease','First 2-3 seconds: a tight close-up of that feature with the text WHAT FISH IS THIS?',4],
+  ['Show the whole fish','Follow with a 3-4 second shot of the full fish so viewers can inspect it. Keep text off the fish.',4],
+  ['Reveal the name','Show the species name in large clean text for about 1.5 seconds. Check the spelling.',3],
+  ['Add one fact','One sentence only, spoken or on screen, 12 words or fewer.',3],
+  ['Ask one question','Text such as Have you caught one? Use one question only.',2],
+  ['Add captions','If you speak, use auto captions, then correct fish and gear names by hand.',5],
+  ['Make it loop','End on the opening close-up so the video loops. A 1 second logo flash is optional.',3],
+  ['Review and export','Watch with sound and muted. Export 1080x1920, highest quality.',3]]},
+ gear:{name:'Gear or lure video',spec:'15-30 sec | 1080x1920 (9:16) | 30 fps',steps:[
+  ['Open with the catch','Put the best catch clip first for about 2 seconds with the text THIS is what caught it.',3],
+  ['Cut to the lure','2-3 second close-up of the jig or lure, steady and well lit.',4],
+  ['Add the spec line','One line, same place every video: 120g jig | 80m | fast jigging.',3],
+  ['Flash the rod and reel','Show them for 1-2 seconds, no more.',2],
+  ['Show it working','One short action clip of the lure being used.',4],
+  ['Return to the catch','Finish with the catch again so the payoff lands.',3],
+  ['Add one question','Text such as Would you use this color? Use one call to action only.',2],
+  ['Sound and color','Natural sound first, light music under it. Keep colors realistic.',4],
+  ['Review and export','Watch with sound and muted. Export 1080x1920.',3]]},
+ gt:{name:'GT or casting action',spec:'15-25 sec | 1080x1920 (9:16) | 60 fps recommended',steps:[
+  ['Start at the strike','Open right before or right after the GT hits. No intro.',4],
+  ['Keep the cast only if it is short','Use the cast only if it looks strong and lasts about 2 seconds or less.',3],
+  ['Build the fight','Rod loading, drag sound, then your reaction. Keep natural reel and drag audio loud.',4],
+  ['Add the surface boil','If you captured the splash or boil, slow it to about 40% for a moment.',3],
+  ['Reveal the GT clearly','Hold the fish for 1.5-3 seconds with no text over it.',3],
+  ['Add one line','Lure and technique, for example popper | 120g | fast retrieve.',2],
+  ['End strongly','Finish on the release or a strong hero shot, then the logo for 1-2 seconds.',3],
+  ['Review and export','Watch with sound and muted. Export 1080x1920.',3]]},
+ montage:{name:'Lifestyle montage',spec:'20-30 sec | 1080x1920 (9:16) | 30 fps',steps:[
+  ['Pick the theme and the track','Choose a slow or medium-tempo track and one theme, for example This is why we fish the Maldives.',5],
+  ['Select 12-18 clips','Sunrise, boat wake, island, hands rigging, rods, sunset. Pick the most beautiful, steadiest shots.',7],
+  ['Mark the beats','Play the track and add a marker on each strong beat.',4],
+  ['Cut on the beats','Place clips on the markers, each 0.5-1.2 seconds. Put your best shot first.',10],
+  ['Add match cuts','Link scenes by shape or movement, for example rod tip to horizon, wake to wake.',5],
+  ['Grade the color','Warm the highlights slightly, lift the shadows, keep the ocean blue realistic.',5],
+  ['Add one text line','Optional. One short line near the start or end.',2],
+  ['End with the logo','Finish on sunset or the boat, then the original logo for 1-2 seconds.',3],
+  ['Review and export','Watch with sound and muted. Export 1080x1920.',3]]},
+ tip:{name:'Quick tip, question or myth',spec:'15-30 sec | 1080x1920 (9:16) | 30 fps',steps:[
+  ['Write the one-sentence answer','One practical point, in your words, from your own experience.',3],
+  ['Show the question','Put the viewer question or the myth on screen for about 2 seconds at the start.',3],
+  ['Record or place the voice','Record a short voiceover or talk to camera in a quiet spot. Keep it under 20 seconds.',6],
+  ['Cover it with footage','Lay clips over your voice that prove the point: the knot, the cadence, the gear.',7],
+  ['Add captions','Auto captions, then fix gear names. One to three words at a time.',5],
+  ['Add one call to action','One question or one follow line only.',2],
+  ['Review and export','Watch with sound and muted. Export 1080x1920.',3]]},
+ long:{name:'Long YouTube video',spec:'6-12 min | 1920x1080 (16:9) or 4K | 30 or 60 fps | about 4-5 hours in total',steps:[
+  ['Set up the project','New 16:9 project at 1080p or 4K. Make folders: talking, B-roll, action, audio. Name clips by date and place.',15],
+  ['Pull your selects','Skim all footage and mark the best moments. Delete dead time and bad takes.',30],
+  ['Build the cold open','Put your best strike or catch first for 10-15 seconds. Promise the story before any intro.',15],
+  ['Rough-cut the story','Follow the order: intro (15-35 sec), setup, fishing starts, first payoff, middle story, main payoff, wrap-up.',60],
+  ['Tighten the pacing','Remove waiting, repeated casts and talk that does not move the story. Change the visual every 3-8 seconds.',30],
+  ['Cover talking with B-roll','Lay ocean, tackle, lure, hands and boat shots over speech and jump cuts.',25],
+  ['Mix the audio','Make speech clear, keep music about 15-20% under speech, and let drag and ocean sounds breathe.',20],
+  ['Add on-screen info','Species, depth and lure only. Keep text short and consistent.',10],
+  ['Grade the color','Even out shots, protect highlights, keep fish colors and skin tones realistic.',15],
+  ['Write the wrap-up and chapters','Last 30-60 seconds: what worked, what you caught, one lesson, next-trip teaser, and one next video to watch. Add chapter timestamps for the description.',10],
+  ['Make the thumbnail','Follow the thumbnail guide in the chips above.',15],
+  ['Export and upload','Export H.264, 16:9. Add a clean title, a description with 3-5 hashtags and chapters. Publish on a Sunday.',15]]},
+ thumb:{name:'YouTube thumbnail',spec:'1280x720 JPG | under 2 MB | readable at phone size',steps:[
+  ['Choose the hero frame','Pick the best frame: fish plus a strong reaction when possible.',5],
+  ['Crop tight','Crop so the fish and face are big and readable on a phone.',3],
+  ['Boost contrast','Separate the subject from the background. Keep fish colors realistic.',3],
+  ['Add 0-4 words','Examples: 100M DEEP, GIANT GT, MONSTER SNAPPER. Large, high contrast.',4],
+  ['Keep the fish clear','Never cover the fish with text. Keep the logo small or leave it out.',2],
+  ['Check at phone size','Shrink it to about 2 inches wide. If it is not instantly clear, simplify.',3],
+  ['Export','Export 1280x720 JPG under 2 MB.',2]]}
+};
+var GKEYS=['catch','fishid','gear','gt','montage','tip','long','thumb'];
 
 var LISTS={
  before:['Before the trip',['Clean the lens, charge phone and camera, free up storage','Set vertical mode (9:16), 1080p or 4K; 60 fps for splashes, strikes and releases','Note lure, jig weight, rod and reel, depth and location type','Pick your must-capture moments: preparation, cast or drop, strike, fight, reveal, release','Have the original VeyruKeyolhu logo ready for the last 1-2 seconds']],
@@ -132,10 +212,10 @@ var NAVS=[['today','Today'],['plan','Plan'],['ideas','Ideas'],['track','Track'],
 var TITLES={today:'Today',plan:'Plan',ideas:'Idea bank',track:'Tracker',write:'Writer'};
 
 /* ---------- State ---------- */
-var S={ideas:{},slots:{},checks:{},posts:[],favs:{},tried:{},wr:{fish:'Giant Trevally',depth:'100',lure:'120g jig',hook:'',ask:'',emoji:true,plat:'Instagram'}};
-var UI={wsub:'writer',ccat:'all',ecat:'any',onlyfav:false,tab:'today',sub:'cal',cat:'all',st:'all',q:'',open:0,range:'all',edit:null,form:null,confirm:null,openMonth:0};
+var S={ideas:{},slots:{},checks:{},posts:[],favs:{},tried:{},plans:{},notes:{},start:null,wr:{fish:'Giant Trevally',depth:'100',lure:'120g jig',hook:'',ask:'',emoji:true,plat:'Instagram'}};
+var UI={pm:0,g:'catch',wsub:'writer',ccat:'all',ecat:'any',onlyfav:false,tab:'today',sub:'cal',cat:'all',st:'all',q:'',open:0,range:'all',edit:null,form:null,confirm:null,openMonth:0};
 try{var raw=localStorage.getItem(KEY); if(raw){var p=JSON.parse(raw); if(p&&typeof p==='object'){for(var k in p){S[k]=p[k];}}}}catch(e){}
-S.favs=S.favs||{}; S.tried=S.tried||{};
+S.favs=S.favs||{}; S.tried=S.tried||{}; S.plans=S.plans||{}; S.notes=S.notes||{};
 try{var t=localStorage.getItem(KEY+'-tab'); if(t&&TITLES[t]) UI.tab=t;}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function saveTab(){try{localStorage.setItem(KEY+'-tab',UI.tab);}catch(e){}}
@@ -154,8 +234,53 @@ function copy(text){
   function fb(){try{var a=document.createElement('textarea');a.value=text;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);toast('Copied');}catch(e){toast('Select and copy manually');}}
   try{ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){toast('Copied');},fb);} else fb(); }catch(e){fb();}
 }
-function nextSlot(){for(var i=0;i<SLOTS.length;i++){if(!S.slots[SLOTS[i].key]) return SLOTS[i];} return null;}
-function doneCount(){var n=0; SLOTS.forEach(function(s){if(S.slots[s.key])n++;}); return n;}
+
+/* ---------- Monthly plan engine ----------
+   A "month" is a 28-day cycle of 4 Monday-to-Sunday weeks, 12 posts (Tue, Thu, Sun).
+   Month 1 is the fixed starter plan. When a new cycle begins, the next month is built
+   automatically from your logged results and the idea bank. */
+var MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], DOWS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function addDays(d,n){return new Date(d.getFullYear(),d.getMonth(),d.getDate()+n,12);}
+function fmtDate(d){return DOWS[d.getDay()]+' '+d.getDate()+' '+MONS[d.getMonth()];}
+function startDate(){return S.start?new Date(S.start+'T12:00:00'):null;}
+function dateOf(s){var sd=startDate(); return sd?addDays(sd,(s.m-1)*28+s.w*7+DAYOFF[s.day]):null;}
+function curMonth(){var sd=startDate(); if(!sd) return 1; var t=today(); var days=Math.floor((new Date(t.getFullYear(),t.getMonth(),t.getDate(),12)-sd)/864e5); return days<0?1:Math.floor(days/28)+1;}
+function monthRange(m){var sd=startDate(); if(!sd) return ''; return fmtDate(addDays(sd,(m-1)*28))+' to '+fmtDate(addDays(sd,m*28-1));}
+function monthRows(m){return m===1?MONTH1:(S.plans&&S.plans[m])||null;}
+function mkSlots(m,rows){var out=[]; rows.forEach(function(w,wi){w.forEach(function(x,si){out.push({key:'M'+m+'-'+wi+'-'+si,m:m,w:wi,day:x[0],role:x[1],idea:x[2],note:x[3]||'',title:x[2]?IDX[x[2]].title:x[1]});});}); return out;}
+function monthSlots(m){var r=monthRows(m); return r?mkSlots(m,r):[];}
+function planMonths(){var a=[1]; Object.keys(S.plans||{}).map(Number).sort(function(x,y){return x-y;}).forEach(function(m){if(m>1)a.push(m);}); return a;}
+function findSlot(key){var ms=planMonths(); for(var i=0;i<ms.length;i++){var sl=monthSlots(ms[i]); for(var j=0;j<sl.length;j++){if(sl[j].key===key) return sl[j];}} return null;}
+function countDone(sl){var n=0; sl.forEach(function(s){if(S.slots[s.key])n++;}); return n;}
+function nextSlot(){var ms=planMonths(), cm=curMonth(); for(var i=0;i<ms.length;i++){if(ms[i]<cm) continue; var sl=monthSlots(ms[i]); for(var j=0;j<sl.length;j++){if(!S.slots[sl[j].key]) return sl[j];}} return null;}
+function perf(){var agg={}; S.posts.forEach(function(p){if(p.ex||p.nostats||!p.cat||p.cat==='long') return; var a=agg[p.cat]=agg[p.cat]||{n:0,v:0}; a.n++; a.v+=Number(p.views)||0;});
+  var best=null,bv=0; for(var c in agg){var av=agg[c].v/agg[c].n; if(av>bv){bv=av;best=c;}} return best?{cat:best,avg:bv}:null;}
+function pickIdea(cat,taken,prior,m,salt){
+  var list=IDEAS.filter(function(r){return r[1]===cat;}).map(function(r){return r[0];});
+  if(!list.length) return {id:0,redo:false};
+  var off=(m*5+salt)%list.length, ord=list.slice(off).concat(list.slice(0,off));
+  function st(i){return S.ideas[i]||'new';}
+  var pool=ord.filter(function(i){return taken.indexOf(i)<0;});
+  var id=pool.filter(function(i){return st(i)==='new'&&prior.indexOf(i)<0;})[0]||pool.filter(function(i){return st(i)==='new';})[0]||pool.filter(function(i){return st(i)==='planned';})[0]||pool[0]||ord[0];
+  taken.push(id); return {id:id,redo:st(id)==='posted'};
+}
+function genMonth(m){
+  var P=perf(), win=P?P.cat:'action', taken=[], prior=[];
+  MONTH1.forEach(function(w){w.forEach(function(x){if(x[2])prior.push(x[2]);});});
+  Object.keys(S.plans).forEach(function(k){if(Number(k)===m) return; S.plans[k].forEach(function(w){w.forEach(function(x){if(x[2])prior.push(x[2]);});});});
+  function sl(day,role,cat,salt,note){var r=pickIdea(cat,taken,prior,m,salt), n=note||''; if(r.redo) n+=(n?' ':'')+'You posted this one already, so film a fresh version with new footage.'; return [day,role,r.id,n];}
+  var rows=[
+   [sl('Tue','Repeat the winner',win,0,P?'Your best format so far.':'No stats yet, so this is a solid all-round pick.'),sl('Thu','Viewer question','comm',0,'Pick a real comment or question and answer it with footage.'),sl('Sun','Series episode','id',1,'Part of a series so viewers know what to expect.')],
+   [sl('Tue','Action','action',1,'Use your strongest unused strike or fight footage.'),sl('Thu','Quick tip','gear',0,'One practical tip in 15-30 seconds.'),sl('Sun','Long video','long',0,'Build it around one challenge or target species. Cut a 15 sec teaser.')],
+   [sl('Tue','Winner again',win,2,P?'Same format, different footage.':'Try a second one of the same format.'),sl('Thu','Gear comparison','gear',1,'Compare two setups on one simple measure.'),sl('Sun','Lifestyle or behind the scenes','life',0,'Trip prep, sunrise departure or a sunset montage.')],
+   [sl('Tue','Best unused action','action',2,'Pick the best clip you have not used yet.'),sl('Thu','Community choice','comm',1,'Offer 2-3 options and let viewers choose the next video.'),sl('Sun','Long video and recap','long',1,'Cut a 20 sec recap Short of the month\'s best 5 clips.')]
+  ];
+  S.notes[m]=P?'Built from your results: '+CATS[P.cat]+' posts average '+fmtNum(P.avg)+' views, so weeks 1 and 3 repeat that format.':'No post stats are logged yet, so this month rotates every format. Log views in Track and the next month adapts.';
+  return rows;
+}
+function ensurePlans(){var cm=curMonth(), ch=false; for(var m=2;m<=cm;m++){if(!S.plans[m]){S.plans[m]=genMonth(m); ch=true;}} if(ch) save();}
+function guideFor(s){var i=s.idea?IDX[s.idea]:null; if(!i) return 'catch'; if(i.id===3) return 'gt'; if(i.cat==='id') return 'fishid'; if(i.cat==='gear') return (i.id===22||i.id===23||i.id===24)?'tip':'gear'; if(i.cat==='life') return 'montage'; if(i.cat==='comm') return 'tip'; if(i.cat==='long') return 'long'; return 'catch';}
+function dueTag(s){var dt=dateOf(s); if(!dt||S.slots[s.key]) return ''; var t=ymd(dt), n=ymd(today()); if(t<n) return '<span class="tag due">Overdue</span>'; if(t===n) return '<span class="tag ok">Due today</span>'; return '';}
 function eng(p){return (Number(p.saves)||0)+(Number(p.shares)||0)+(Number(p.comments)||0);}
 
 /* ---------- Views ---------- */
@@ -168,31 +293,40 @@ function viewToday(){
   var d=today(), dow=d.getDay(), wd=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][dow];
   var post=(dow===2||dow===4||dow===0);
   var nextDay=''; if(!post){var add=1; while(true){var t=(dow+add)%7; if(t===2||t===4||t===0){nextDay=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][t]+(add===1?' (tomorrow)':' (in '+add+' days)'); break;} add++;}}
-  var slot=nextSlot(); var mon=monday(d); var monS=ymd(mon);
+  var cm=curMonth(), slot=nextSlot(), ms=monthSlots(cm), done=countDone(ms);
+  var mon=monday(d); var monS=ymd(mon);
   var weekPosts=S.posts.filter(function(p){return p.date>=monS && p.date<=ymd(new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6)) && !p.ex;});
   var days=[['Tue',2],['Thu',4],['Sun',0]]; var dots='';
   var dayHit={}; weekPosts.forEach(function(p){var pd=new Date(p.date+'T12:00:00'); dayHit[pd.getDay()]=1;});
   days.forEach(function(x){dots+='<div class="dot'+(dayHit[x[1]]?' on':'')+'" title="'+x[0]+'">'+x[0].charAt(0)+'</div>';});
   var h='';
   if(!isStandalone()){ if(DEFERRED) h+='<section class="card"><div class="row between"><div class="grow"><b>Install this app</b><div class="small muted">Add it to your home screen and use it offline.</div></div><button class="btn pri" data-act="install">Install</button></div></section>'; else if(isIOS()) h+='<section class="card"><b>Install on iPhone</b><div class="small muted">Tap Share, then Add to Home Screen.</div></section>'; }
+  if(!S.start){
+    var x=new Date(d.getFullYear(),d.getMonth(),d.getDate(),12); while(x.getDay()!==1) x.setDate(x.getDate()+1);
+    h+='<section class="card next"><div class="lab">Start your 30-day plan</div><div class="big" style="margin-top:4px">Pick your first Monday</div><p class="small muted" style="margin:6px 0 0">Weeks run Monday to Sunday and posts land on Tuesday, Thursday and Sunday. After 4 weeks the next month is built for you from your results.</p><div class="row" style="margin-top:10px;flex-wrap:nowrap"><input type="date" id="st-date" value="'+ymd(x)+'" style="max-width:190px" aria-label="First Monday"><button class="btn pri" data-act="startplan">Start plan</button></div></section>';
+  }
   h+='<section class="card"><div class="row between"><div><div class="lab">'+wd+'</div><div class="big">'+(post?'Post day':'Film and prep day')+'</div></div><div class="days" aria-label="This week">'+dots+'</div></div>'+
     '<p class="muted small" style="margin:8px 0 0">'+(post?'Ship one post today. Fish first, one question, one action clip, one payoff, one call to action.':'Next post day: '+nextDay+'. Use today to film, select clips or build a silent cut.')+'</p>'+
     '<div class="small muted" style="margin-top:8px">'+weekPosts.length+' of 3 posts logged this week</div><div class="bar" style="margin-top:4px"><i style="width:'+Math.min(100,weekPosts.length/3*100)+'%"></i></div></section>';
   if(slot){
-    var idea=slot.idea?IDX[slot.idea]:null;
-    h+='<section class="card next"><div class="lab">Up next in your plan: '+slot.month+', '+slot.week+', '+slot.day+'</div>'+
-      '<div class="big" style="margin-top:4px">'+esc(slot.title)+'</div>';
+    var idea=slot.idea?IDX[slot.idea]:null, dt=dateOf(slot);
+    h+='<section class="card next"><div class="lab">Up next: Month '+slot.m+', Week '+(slot.w+1)+', '+(dt?fmtDate(dt):slot.day)+'</div>'+
+      '<div class="row" style="margin-top:6px"><span class="tag">'+esc(slot.role)+'</span>'+dueTag(slot)+'</div>'+
+      '<div class="big" style="margin-top:6px">'+esc(slot.title)+'</div>';
     if(idea&&idea.cat!=='long'){h+='<div style="margin:10px 0 6px" class="lab">Hook text</div><div class="hook">'+esc(idea.hook)+'</div><p class="small" style="margin:8px 0 0">'+esc(idea.how)+'</p>';}
     else if(idea){h+='<p class="small" style="margin:8px 0 0">'+esc(idea.how)+' Pick any long-video idea that fits your trip.</p>';}
     else{h+='<p class="small muted" style="margin:8px 0 0">No fixed idea for this slot. Use your best unused footage and the emergency formula.</p>';}
+    if(slot.note) h+='<p class="small muted" style="margin:6px 0 0">'+esc(slot.note)+'</p>';
     h+='<div class="row" style="margin-top:12px"><button class="btn pri" data-act="quick" data-k="'+slot.key+'">Mark posted</button>'+
+      '<button class="btn" data-act="guide" data-g="'+guideFor(slot)+'">Edit steps</button>'+
       '<button class="btn" data-act="logslot" data-k="'+slot.key+'">Log stats</button>'+
       '<button class="btn ghost" data-act="skip" data-k="'+slot.key+'">Skip</button>'+
       (idea?'<button class="btn ghost" data-act="jump" data-id="'+idea.id+'">Open idea</button>':'')+'</div></section>';
   } else {
-    h+='<section class="card"><div class="big">Two-month plan complete</div><p class="muted small">Repeat your best format and start a new round from the Plan tab.</p></section>';
+    var unlock=startDate()?fmtDate(addDays(startDate(),cm*28)):'';
+    h+='<section class="card next"><div class="big">Month '+cm+' complete</div><p class="muted small" style="margin:6px 0 10px">'+(S.plans[cm+1]?'Month '+(cm+1)+' is ready in the Plan tab.':'Your next plan builds itself'+(unlock?' on '+unlock:' when the next cycle starts')+', using what worked this month.')+'</p>'+(S.plans[cm+1]?'':'<button class="btn pri" data-act="genext">Build next month now</button>')+'</section>';
   }
-  h+='<section class="card"><div class="row between"><div class="lab">Plan progress</div><span class="mono">'+doneCount()+' / '+SLOTS.length+'</span></div><div class="bar" style="margin-top:8px"><i style="width:'+(doneCount()/SLOTS.length*100)+'%"></i></div></section>';
+  h+='<section class="card"><div class="row between"><div class="lab">Month '+cm+' progress</div><span class="mono">'+done+' / '+ms.length+'</span></div><div class="bar" style="margin-top:8px"><i style="width:'+(done/ms.length*100)+'%"></i></div>'+(S.start?'<div class="small muted" style="margin-top:6px">'+monthRange(cm)+(S.plans[cm+1]?'':'. Next month builds itself on '+fmtDate(addDays(startDate(),cm*28))+'.')+'</div>':'')+(cm>1&&S.notes[cm]?'<p class="small" style="margin:8px 0 0">'+esc(S.notes[cm])+'</p>':'')+'</section>';
   h+='<section class="card"><div class="lab">Emergency formula</div><div class="big" style="margin-top:4px">Fish first, 1 question, 1 action clip, 1 payoff, 1 call to action</div><p class="small muted" style="margin:6px 0 0">Show the GT, ask "Would you cast here?", strike, fight, reveal, "Follow for more Maldives fishing."</p></section>';
   h+='<section class="card"><div class="row between"><div class="lab">Trip-day checklists</div></div><div class="row" style="margin-top:8px"><button class="btn sm" data-act="sub" data-v="lists" data-k="before">Before</button><button class="btn sm" data-act="sub" data-v="lists" data-k="shots">Shot list</button><button class="btn sm" data-act="sub" data-v="lists" data-k="after">After</button><button class="btn sm" data-act="sub" data-v="lists" data-k="pub">Publish</button></div></section>';
   return h;
@@ -205,17 +339,28 @@ function checklist(k){
 function viewPlan(){
   var h='<div class="chips"><button class="chip" aria-pressed="'+(UI.sub==='cal')+'" data-act="sub" data-v="cal">Calendar</button><button class="chip" aria-pressed="'+(UI.sub==='lists')+'" data-act="sub" data-v="lists">Checklists</button></div>';
   if(UI.sub==='lists'){LKEYS.forEach(function(k){h+=checklist(k);}); return h;}
-  PLAN.forEach(function(m,mi){
-    h+='<div class="lab" style="margin-top:6px">'+m[0]+(mi===0?': repeat what works, test new formats':': winning format, viewer questions, series')+'</div>';
-    m[1].forEach(function(w,wi){
-      h+='<section class="card"><h3>'+w[0]+'</h3><div class="wk">';
-      w[1].forEach(function(s,si){
-        var key=mi+'-'+wi+'-'+si, on=!!S.slots[key];
-        h+='<div class="slot'+(on?' done':'')+'"><input type="checkbox" data-in="slot" data-k="'+key+'" aria-label="Mark done"'+(on?' checked':'')+'><span class="dayl">'+s[0]+'</span><div class="grow t">'+esc(s[1])+(s[2]?' <button class="btn sm ghost" data-act="jump" data-id="'+s[2]+'">Idea</button>':'')+'</div></div>';
-      });
-      h+='</div></section>';
+  var months=planMonths(), cm=curMonth(), last=months[months.length-1];
+  if(!UI.pm||months.indexOf(UI.pm)<0) UI.pm=Math.min(cm,last);
+  h+='<div class="chips">';
+  months.forEach(function(m){h+='<button class="chip" aria-pressed="'+(UI.pm===m)+'" data-act="pm" data-v="'+m+'">Month '+m+(m===cm?' (now)':'')+'</button>';});
+  if(last<=cm) h+='<button class="chip" data-act="genext">Build next month</button>';
+  h+='</div>';
+  var m=UI.pm, sl=monthSlots(m), dn=countDone(sl), sd=startDate();
+  var note=m===1?'Starter plan: one of each format so you learn what your audience likes. Month 2 builds itself from your results.':(S.notes[m]||'');
+  h+='<section class="card"><div class="row between"><div><div class="lab">Month '+m+(sd?': '+monthRange(m):'')+'</div><div class="big">'+dn+' of '+sl.length+' posted</div></div>'+(m>1&&dn===0?'<button class="btn sm" data-act="regen" data-m="'+m+'">Rebuild from latest stats</button>':'')+'</div><div class="bar" style="margin-top:8px"><i style="width:'+(dn/sl.length*100)+'%"></i></div><p class="small" style="margin:8px 0 0">'+esc(note)+'</p>'+
+    '<details style="margin-top:8px"><summary class="small">'+(sd?'Plan started '+fmtDate(sd)+'. Change start date':'Set your start date')+'</summary><div class="row" style="margin-top:8px;flex-wrap:nowrap"><input type="date" id="st-date" value="'+(S.start||'')+'" style="max-width:190px" aria-label="Start date"><button class="btn sm pri" data-act="startplan">Save</button></div><p class="small muted">The date snaps to that week\'s Monday.</p></details></section>';
+  for(var w=0;w<4;w++){
+    var wk=sl.filter(function(x){return x.w===w;});
+    h+='<section class="card"><div class="row between"><h3>Week '+(w+1)+'</h3>'+(sd?'<span class="mono small muted">'+fmtDate(addDays(sd,(m-1)*28+w*7))+' to '+fmtDate(addDays(sd,(m-1)*28+w*7+6))+'</span>':'')+'</div><div class="wk">';
+    wk.forEach(function(s){
+      var on=!!S.slots[s.key], dt=dateOf(s);
+      h+='<div class="slot'+(on?' done':'')+'"><input type="checkbox" data-in="slot" data-k="'+s.key+'" aria-label="Mark done"'+(on?' checked':'')+'><span class="dayl">'+s.day+'</span><div class="grow t">'+esc(s.title)+
+        '<div class="row small muted" style="margin-top:3px"><span class="tag">'+esc(s.role)+'</span>'+(dt?'<span class="mono">'+fmtDate(dt)+'</span>':'')+dueTag(s)+'</div>'+
+        (s.note?'<div class="small muted" style="margin-top:3px">'+esc(s.note)+'</div>':'')+
+        '<div class="row" style="margin-top:6px">'+(s.idea?'<button class="btn sm ghost" data-act="jump" data-id="'+s.idea+'">Idea</button>':'')+'<button class="btn sm ghost" data-act="guide" data-g="'+guideFor(s)+'">Edit steps</button></div></div></div>';
     });
-  });
+    h+='</div></section>';
+  }
   return h;
 }
 function ideaList(){
@@ -342,11 +487,23 @@ function viewEdits(){
   });
   return h+'</div>';
 }
+function viewGuide(){
+  var key=GUIDES[UI.g]?UI.g:'catch', g=GUIDES[key], total=0, n=0;
+  g.steps.forEach(function(st,i){total+=st[2]; if(S.checks['g.'+key+'.'+i]) n++;});
+  var h='<div class="chips">';
+  GKEYS.forEach(function(k){h+='<button class="chip" aria-pressed="'+(key===k)+'" data-act="gsel" data-v="'+k+'">'+esc(GUIDES[k].name)+'</button>';});
+  h+='</div><section class="card"><div class="row between"><div><div class="lab">Step-by-step edit</div><div class="big">'+esc(g.name)+'</div></div><button class="btn sm ghost" data-act="resetg" data-g="'+key+'">Reset</button></div><p class="small muted" style="margin:6px 0 0">'+esc(g.spec)+'</p><div class="row between small" style="margin-top:10px"><span class="mono">'+n+' of '+g.steps.length+' steps</span><span class="mono muted">About '+(total>=90?(Math.round(total/6)/10)+' hours':total+' min')+'</span></div><div class="bar" style="margin-top:4px"><i style="width:'+(n/g.steps.length*100)+'%"></i></div><div style="margin-top:8px">';
+  g.steps.forEach(function(st,i){
+    var id='g.'+key+'.'+i, on=!!S.checks[id];
+    h+='<label class="chk gstep'+(on?' gdone':'')+'"><input type="checkbox" data-in="chk" data-id="'+id+'"'+(on?' checked':'')+'><span class="grow"><b>'+(i+1)+'. '+esc(st[0])+'</b> <span class="mono small muted">'+st[2]+' min</span><span class="small" style="display:block;margin-top:2px">'+esc(st[1])+'</span></span></label>';
+  });
+  return h+'</div></section>';
+}
 function viewWrite(){
-  var subs=[['writer','Writer'],['caps','Caption ideas'],['edits','Editing ideas']], h='<div class="chips">';
+  var subs=[['writer','Writer'],['guide','Edit guide'],['caps','Caption ideas'],['edits','Editing ideas']], h='<div class="chips">';
   subs.forEach(function(s){h+='<button class="chip" aria-pressed="'+(UI.wsub===s[0])+'" data-act="wsub" data-v="'+s[0]+'">'+s[1]+'</button>';});
   h+='</div>';
-  return h+(UI.wsub==='caps'?viewCaps():UI.wsub==='edits'?viewEdits():viewWriter());
+  return h+(UI.wsub==='caps'?viewCaps():UI.wsub==='edits'?viewEdits():UI.wsub==='guide'?viewGuide():viewWriter());
 }
 function viewWriter(){
   var w=S.wr, po=''; ['Instagram','TikTok','YouTube'].forEach(function(p){po+='<option'+(w.plat===p?' selected':'')+'>'+p+'</option>';});
@@ -361,6 +518,7 @@ function viewWriter(){
 
 /* ---------- Render ---------- */
 function render(){
+  ensurePlans();
   $('#ttl').textContent=TITLES[UI.tab];
   var d=today(); $('#dt').textContent=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+' '+d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
   var nv=''; NAVS.forEach(function(n){nv+='<button data-act="tab" data-v="'+n[0]+'"'+(UI.tab===n[0]?' aria-current="page"':'')+'>'+n[1]+'</button>';}); $('#nav').innerHTML=nv;
@@ -380,9 +538,16 @@ function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigato
 var ACT={
   install:function(){if(!DEFERRED)return; DEFERRED.prompt(); DEFERRED.userChoice.then(function(){DEFERRED=null; render();});},
   tab:function(el){setTab(el.dataset.v);},
+  startplan:function(){var v=$('#st-date').value; if(!v){toast('Pick a date first');return;} S.start=ymd(monday(new Date(v+'T12:00:00'))); save(); ensurePlans(); render(); toast('Plan starts '+fmtDate(startDate()));},
+  genext:function(){var m=planMonths().slice(-1)[0]+1; S.plans[m]=genMonth(m); UI.pm=m; save(); UI.tab='plan'; saveTab(); render(); toast('Month '+m+' is ready');},
+  regen:function(el){var m=Number(el.dataset.m); S.plans[m]=genMonth(m); save(); render(); toast('Month '+m+' rebuilt');},
+  pm:function(el){UI.pm=Number(el.dataset.v); render();},
+  guide:function(el){UI.tab='write'; UI.wsub='guide'; UI.g=el.dataset.g; saveTab(); render(); window.scrollTo(0,0);},
+  gsel:function(el){UI.g=el.dataset.v; render();},
+  resetg:function(el){var k=el.dataset.g; GUIDES[k].steps.forEach(function(_,i){delete S.checks['g.'+k+'.'+i];}); save(); render();},
   sub:function(el){UI.sub=el.dataset.v; if(el.dataset.k){UI.tab='plan'; saveTab(); render(); var t=document.querySelectorAll('.card'); for(var i=0;i<t.length;i++){var h=t[i].querySelector('h3'); if(h&&h.textContent===LISTS[el.dataset.k].t){t[i].scrollIntoView({block:'start'});break;}} return;} render();},
-  quick:function(el){var s=SLOTS.filter(function(x){return x.key===el.dataset.k;})[0]; markSlot(s.key,s.idea,ymd(today())); S.posts.push({id:newId(),date:ymd(today()),plat:'Not set',title:s.title,cat:s.idea?IDX[s.idea].cat:'',nostats:true,slot:s.key,idea:s.idea||''}); save(); render(); toast('Marked posted. Add stats in Track.');},
-  logslot:function(el){var s=SLOTS.filter(function(x){return x.key===el.dataset.k;})[0]; UI.form={date:ymd(today()),plat:'Instagram Reel',title:s.title,idea:s.idea||'',cat:s.idea?IDX[s.idea].cat:'',slot:s.key}; UI.edit=null; setTab('track');},
+  quick:function(el){var s=findSlot(el.dataset.k); markSlot(s.key,s.idea,ymd(today())); S.posts.push({id:newId(),date:ymd(today()),plat:'Not set',title:s.title,cat:s.idea?IDX[s.idea].cat:'',nostats:true,slot:s.key,idea:s.idea||''}); save(); render(); toast('Marked posted. Add stats in Track.');},
+  logslot:function(el){var s=findSlot(el.dataset.k); UI.form={date:ymd(today()),plat:'Instagram Reel',title:s.title,idea:s.idea||'',cat:s.idea?IDX[s.idea].cat:'',slot:s.key}; UI.edit=null; setTab('track');},
   skip:function(el){S.slots[el.dataset.k]='skipped'; save(); render();},
   jump:function(el){UI.tab='ideas'; UI.cat='all'; UI.st='all'; UI.q=''; UI.open=Number(el.dataset.id); saveTab(); render(); var t=document.getElementById('idea-'+el.dataset.id); if(t) t.scrollIntoView({block:'start'});},
   toggle:function(el){var id=Number(el.dataset.id); UI.open=UI.open===id?0:id; $('#ilist').innerHTML=ideaList();},
@@ -407,7 +572,7 @@ var ACT={
       {id:newId(),ex:true,date:dd(6),plat:'TikTok',title:'What caught it',cat:'gear',views:1800,saves:95,shares:20,comments:9,followers:6,ret:49}); save(); render();},
   clrex:function(){S.posts=S.posts.filter(function(p){return !p.ex;}); save(); render();},
   backup:function(){copy(JSON.stringify(S));},
-  restore:function(){var t=$('#rb').value.trim(); if(!t){toast('Paste a backup first');return;} try{var p=JSON.parse(t); if(!p||typeof p!=='object'||!Array.isArray(p.posts)) throw 0; S=Object.assign({ideas:{},slots:{},checks:{},posts:[],favs:{},tried:{},wr:S.wr},p); save(); render(); toast('Backup restored');}catch(e){toast('That is not a valid backup');}}
+  restore:function(){var t=$('#rb').value.trim(); if(!t){toast('Paste a backup first');return;} try{var p=JSON.parse(t); if(!p||typeof p!=='object'||!Array.isArray(p.posts)) throw 0; S=Object.assign({ideas:{},slots:{},checks:{},posts:[],favs:{},tried:{},plans:{},notes:{},start:null,wr:S.wr},p); S.plans=S.plans||{}; S.notes=S.notes||{}; save(); render(); toast('Backup restored');}catch(e){toast('That is not a valid backup');}}
 };
 document.addEventListener('click',function(e){var el=e.target.closest('[data-act]'); if(!el) return; var f=ACT[el.dataset.act]; if(f){f(el);}});
 document.addEventListener('input',function(e){var el=e.target, k=el.dataset&&el.dataset.in; if(!k) return;
@@ -417,7 +582,7 @@ document.addEventListener('input',function(e){var el=e.target, k=el.dataset&&el.
 document.addEventListener('change',function(e){var el=e.target, k=el.dataset&&el.dataset.in; if(!k){ if(el.id==='f-idea'){var i=IDX[el.value]; if(i){$('#f-title').value=i.title;}} return;}
   if(k==='chk'){if(el.checked)S.checks[el.dataset.id]=1; else delete S.checks[el.dataset.id]; save(); render();}
   else if(k==='tried'){if(el.checked)S.tried[el.dataset.i]=1; else delete S.tried[el.dataset.i]; save(); render();}
-  else if(k==='slot'){var s=SLOTS.filter(function(x){return x.key===el.dataset.k;})[0]; if(el.checked){markSlot(s.key,s.idea,ymd(today()));} else {delete S.slots[s.key];} save(); render();}
+  else if(k==='slot'){var s=findSlot(el.dataset.k); if(el.checked){markSlot(s.key,s.idea,ymd(today()));} else {delete S.slots[s.key];} save(); render();}
   else if(k==='wr'&&el.tagName==='SELECT'){S.wr[el.dataset.f]=el.value; save(); $('#wout').innerHTML=wrOut();}
 });
 document.addEventListener('submit',function(e){

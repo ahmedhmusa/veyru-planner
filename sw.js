@@ -1,6 +1,6 @@
 /* Service worker: precaches the app shell so it opens offline.
    To ship an update, change CACHE_VERSION and push. */
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE = 'veyru-planner-' + CACHE_VERSION;
 const SHELL = [
   './',

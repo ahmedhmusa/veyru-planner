@@ -1,6 +1,6 @@
 # VeyruKeyolhu Content Planner
 
-An installable, offline-capable web app (PWA) for planning Maldives fishing content: a 2-month posting plan, trip and publish checklists, a 46-idea video bank, editing and caption ideas, a post tracker with a Sunday review, and a title, hook and caption writer.
+An installable, offline-capable web app (PWA) for planning Maldives fishing content: a 30-day posting plan that builds each following month automatically, step-by-step video editing guides, trip and publish checklists, a 46-idea video bank, editing and caption ideas, a post tracker with a Sunday review, and a title, hook and caption writer.
 
 No build step and no dependencies. It is plain HTML, CSS and JavaScript.
 
@@ -61,6 +61,14 @@ Then open `http://localhost:8000`. Service workers work on `localhost` and on HT
 | `icons/` | App icons (standard and maskable) |
 | `.github/workflows/pages.yml` | GitHub Pages deployment |
 
+## How the monthly plan works
+
+- Pick your first Monday on the Today tab. A "month" is a 28-day cycle of four Monday-to-Sunday weeks with 12 posts (Tuesday, Thursday, Sunday).
+- Month 1 is the fixed starter plan: one of each format.
+- When day 29 arrives, Month 2 is built automatically (and every month after that). It looks at the posts you logged in Track, finds your best-performing format by average views, repeats it in weeks 1 and 3, and fills the other slots with unused ideas from the bank. Ideas you already posted are only reused with a "film a fresh version" note.
+- Finished a month early? Tap **Build next month now**. Log more stats first and tap **Rebuild from latest stats** on a month where nothing is ticked yet.
+- Every slot has **Edit steps**, which opens the matching step-by-step editing guide (Big catch, Fish ID, Gear, GT, Montage, Quick tip, Long video, Thumbnail) with a tick-off list and time estimates.
+
 ## Customize
 
-Ideas, caption templates, editing tips and the 2-month plan live at the top of `app.js` in the `IDEAS`, `CAPS`, `EDITS` and `PLAN` arrays. The brand colors are the CSS variables at the top of `styles.css`.
+Ideas, caption templates, editing tips, the Month 1 plan and the editing guides live at the top of `app.js` in `IDEAS`, `CAPS`, `EDITS`, `MONTH1` and `GUIDES`. The generator for later months is `genMonth` in the same file. The brand colors are the CSS variables at the top of `styles.css`.

@@ -101,3 +101,8 @@ details summary{cursor:pointer;font-weight:600}
 
 [hidden]{display:none!important}
 .noscript{padding:24px;text-align:center}
+.tag.due{background:transparent;border:1px solid var(--hot);color:var(--hot)}
+.tag.ok{background:var(--ok);color:#fff}
+.gstep b{font-weight:600}
+.gdone{opacity:.55}
+details summary{min-height:32px}
