@@ -1,6 +1,6 @@
 # VeyruKeyolhu Content Planner
 
-An installable, offline-capable web app (PWA) for planning Maldives fishing content: a 30-day posting plan that builds each following month automatically, step-by-step video editing guides, trip and publish checklists, a 46-idea video bank, editing and caption ideas, a post tracker with a Sunday review, and a title, hook and caption writer.
+An installable, offline-capable web app (PWA) for planning Maldives fishing content: a 30-day posting plan that builds each following month automatically, step-by-step video editing guides, trip and publish checklists, a 72-idea video bank (trending formats, Maldives culture, series and challenges, action, fish ID, gear, lifestyle, community, long videos), editing and caption ideas, a post tracker with a Sunday review, and a title, hook and caption writer.
 
 No build step and no dependencies. It is plain HTML, CSS and JavaScript.
 
@@ -64,7 +64,7 @@ Then open `http://localhost:8000`. Service workers work on `localhost` and on HT
 ## How the monthly plan works
 
 - Pick your first Monday on the Today tab. A "month" is a 28-day cycle of four Monday-to-Sunday weeks with 12 posts (Tuesday, Thursday, Sunday).
-- Month 1 is the fixed starter plan: one of each format.
+- Month 1 is the starter plan. Tuesday is action or a trending format, Thursday is Maldives culture, fish ID, gear or community, and Sunday is a series episode, challenge or long video.
 - When day 29 arrives, Month 2 is built automatically (and every month after that). It looks at the posts you logged in Track, finds your best-performing format by average views, repeats it in weeks 1 and 3, and fills the other slots with unused ideas from the bank. Ideas you already posted are only reused with a "film a fresh version" note.
 - Finished a month early? Tap **Build next month now**. Log more stats first and tap **Rebuild from latest stats** on a month where nothing is ticked yet.
 - Every slot has **Edit steps**, which opens the matching step-by-step editing guide (Big catch, Fish ID, Gear, GT, Montage, Quick tip, Long video, Thumbnail) with a tick-off list and time estimates.
