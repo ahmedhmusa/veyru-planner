@@ -1,13 +1,17 @@
-export function suggest({scene='',topic='',detail='',hook='',tone='Exciting'}){
- const subject=topic.trim()||'A moment on the water';
+export function suggest({scene='',topic='',detail='',hook='',tone='Exciting',method='',outcome=''}){
  const visual=scene.trim().replace(/[.!?]+$/,'');
+ const subject=topic.trim()||'Fishing';
  const truth=detail.trim();
- const opening=hook.trim()||({Exciting:`${subject} — take a closer look`,Educational:`What can you spot? ${subject}`,Cinematic:`On the water: ${subject}`,Storytelling:`The story behind ${subject}`}[tone]||subject);
- const titles=[opening,`A closer look at ${subject}`,`${subject} | VeyruKeyolhu`,`The moment behind this frame`,`${subject}: what would you notice first?`];
- // Image captions are machine observations, not confirmed footage facts.
- const start=truth||`A closer look at ${subject.toLowerCase()}.`;
- const ideas=[{name:'Story first',body:`${start}\n\nIn this video: the moment, the setup, and the details behind the frame.\n\nWhat would you like to see on our next trip?`},{name:'Conversation starter',body:`${start}\n\nWhat catches your eye first? Share your take in the comments.\n\nFollow VeyruKeyolhu for more moments on the water.`},{name:'Behind the frame',body:`${start}\n\nGo behind the thumbnail: the conditions, the choices and the story from the day.\n\nMore fishing stories every Tuesday, Thursday and Sunday.`}];
- const captionBase=truth||`A moment worth a closer look. ${subject}.`;
- const hashtags='#Fishing #VeyruKeyolhu';
- return {titles,ideas,visual,platforms:[{platform:'YouTube',title:titles[0],body:ideas[0].body+'\n\nSubscribe for GT Strike Tuesday, fish discovery Thursday, and Sunday adventures.\n\n'+hashtags},{platform:'Instagram',title:titles[1],body:captionBase+'\n\nOne frame, a whole story. What stands out to you?\n\nSave this for your next fishing inspiration.\n\n'+hashtags+' #OceanLife'},{platform:'TikTok',title:hook.trim()||`${subject} 👀`,body:captionBase+'\n\nWhat did you spot first?\n\n'+hashtags}]};
+ const sentence=s=>s? s.replace(/^[a-z]/,c=>c.toUpperCase()).replace(/[.!?]+$/,'')+'.':'';
+ const shortVisual=visual.length>90?visual.slice(0,87).replace(/\s+\S*$/,'')+'…':visual;
+ const focus=shortVisual||subject;
+ const lead=hook.trim()||({Exciting:`${subject}: ${focus}`,Educational:`A closer look: ${focus}`,Cinematic:`On the water | ${focus}`,Storytelling:`Behind this fishing moment: ${focus}`}[tone]||focus);
+ const unique=[...new Set([lead,`${subject} | ${focus}`,`Fishing up close: ${focus}`,`From the fishing trip: ${focus}`,`${focus} — VeyruKeyolhu`])];
+ const titles=unique.map(t=>t.slice(0,100));
+ const facts=[sentence(visual),truth].filter(Boolean).join('\n\n');
+ const content=facts||`${subject}: a fishing video from VeyruKeyolhu.`;
+ const speciesTags=[['giant trevally','GT','GTFishing'],['yellowfin','tuna','TunaFishing'],['triggerfish','triggerfish','Triggerfish'],['grouper','grouper','GrouperFishing'],['snapper','snapper','SnapperFishing']].filter(([a,b])=>subject.toLowerCase().includes(a)||subject.toLowerCase().split(/\W+/).includes(b.toLowerCase())).map(x=>'#'+x[2]);
+ const tags=['#Fishing','#VeyruKeyolhu',...speciesTags].join(' ');
+ const ideas=[{name:'Fishing story',body:`${content}\n\nWatch the fishing video for the story behind this frame. What would you like to know about this trip?`},{name:'Angler conversation',body:`${content}\n\nAnglers: what stands out to you in this frame? Share your observations or questions below.`},{name:'Fishing details',body:`${content}\n\nHave a question about the fish, tackle or technique shown? Leave it below for a future fishing video.`}];
+ return {titles,ideas,visual,platforms:[{platform:'YouTube',title:titles[0],body:ideas[0].body+'\n\nFollow VeyruKeyolhu for more fishing videos.\n\n'+tags},{platform:'Instagram',title:titles[1]||titles[0],body:content+'\n\nOne fishing frame, plenty to talk about. What caught your eye?\n\n'+tags},{platform:'TikTok',title:hook.trim()||titles[0],body:content+'\n\nAnglers, what did you notice first?\n\n'+tags}]};
 }
