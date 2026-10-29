@@ -1,5 +1,5 @@
-import {suggest,TECHNIQUES,EVENTS,VOICES} from './smart-captions.js';
-import {SERIES,BASE,today,shift,monday,weekDates,initial,validate} from './core.js';
+import {suggest,TECHNIQUES,EVENTS,VOICES} from './smart-captions.js?v=1.5.1';
+import {SERIES,BASE,today,shift,monday,weekDates,initial,validate} from './core.js?v=1.5.1';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 if(location.hash.startsWith('#connect='))history.replaceState(null,'',location.pathname+location.search+'#captions');
 const KEY='veyru-standalone-v1';let state=initial(),week=monday(today()),editing=null,temporary=[],installPrompt;let startup='';try{const raw=localStorage.getItem(KEY);if(raw)state=validate(JSON.parse(raw))}catch(e){startup='Saved workspace could not be loaded. Export or recover your previous data before saving new work.'}
@@ -38,7 +38,7 @@ document.addEventListener('click',async e=>{const copy=e.target.closest('[data-c
 document.addEventListener('change',async e=>{if(e.target.dataset.check){state.checks[e.target.dataset.check]=e.target.checked;save()}if(e.target.id==='restore'){const file=e.target.files[0];if(!file)return;try{if(file.size>60000000)throw Error('Backup is too large.');const restored=validate(JSON.parse(await file.text()));if(confirm(`Replace your current workspace with ${restored.tasks.length} stories and ${restored.drafts.length} captions?`)){state=restored;temporary=[];editing=null;save();render();notice('Backup restored.')}}catch(err){notice('Restore failed: '+err.message)}e.target.value=''}if(e.target.id==='screen-upload'){const f=e.target.files[0];if(!f)return;if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>2000000||state.screens.length>=20){notice('Choose a PNG, JPEG or WebP under 2 MB; maximum 20 attachments.');return}const reader=new FileReader();reader.onload=()=>{state.screens.push({name:f.name.slice(0,300),data:reader.result});save();render()};reader.onerror=()=>notice('Could not read the image.');reader.readAsDataURL(f)}});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('#install').hidden=false});$('#install').onclick=async()=>{if(installPrompt){await installPrompt.prompt();installPrompt=null;$('#install').hidden=true}};
 function connection(){$('#connection').textContent=navigator.onLine?'● Online':'● Offline'}window.addEventListener('online',connection);window.addEventListener('offline',connection);connection();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.5.0').catch(()=>notice('Offline setup failed. Reopen online over HTTPS or localhost.'));
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js?v=1.5.1').catch(()=>notice('Offline setup failed. Reopen online over HTTPS or localhost.'));
 
 // Track appearance live, including changes made while the app is open.
 const systemAppearance=window.matchMedia('(prefers-color-scheme: dark)');
